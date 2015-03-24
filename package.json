@@ -1,0 +1,16 @@
+{
+  "name": "compilador",
+  "version": "1.0.0",
+  "description": "Compilador para matéria de compiladores II",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "compiler",
+    "lalg",
+    "academic"
+  ],
+  "author": "madcampos",
+  "license": "MIT"
+}

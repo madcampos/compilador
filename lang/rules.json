@@ -1,0 +1,34 @@
+{
+	'types': [
+		{
+			'name': 'integer',
+			'class': 'C3',
+			'rule': /\d/
+		},
+		{
+			'name': 'float',
+			'class': 'C6',
+			'rule': /\d/
+		},
+		{
+			'name': 'identifier',
+			'class': 'C1',
+			'rule': /\w/
+		},
+		{
+			'name': 'reserved_word',
+			'class': 'C2',
+			'rule': /program|begin|end|var|real|integer|procedure|read|write|while|do|if|else|then/
+		},
+		{
+			'name': 'special_character',
+			'class': 'C4',
+			'rule': /<>|:=|<=|>=|\(|\)|\*|\/|-|\+|=|>|<|\$|\:|;|\,/
+		},
+		{
+			'name': 'comments',
+			'class': 'C5',
+			'rule': /\{\}/
+		}
+	]
+}
