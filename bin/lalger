@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env iojs --harmony --harmony_arrays --use_strict
 
 let program = require('commander');
 let fs = require('fs');
@@ -7,7 +7,7 @@ let compiler = require('../index');
 let output = '';
 
 program
-	.version('1.1.1')
+	.version('1.1.2')
 	.usage('[options]')
 	.description('LALG compiler')
 	.option('-t, --tokenize <path>', 'Tokenize the file at the given path.')

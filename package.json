@@ -1,6 +1,6 @@
 {
 	"name": "lalger",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Compiler of the LALG language.",
 	"author": "Marco Aurélio Dilda Campos <madcampos@outlook.com>",
 	"repository": {
