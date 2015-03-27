@@ -2,10 +2,10 @@
  * Scopify a Token.
  * @module src/scopify
  */
-let error = import('./error');
+let error = require('./error');
 
 let scopeStack = [];
-let scopeDelimiters = import('../lang/rules').scopeDelimiters;
+let scopeDelimiters = require('../lang/rules').scopeDelimiters;
 
 /**
  * Find the current scope of the given token and the token stack to follow.
@@ -13,16 +13,16 @@ let scopeDelimiters = import('../lang/rules').scopeDelimiters;
  * @returns {Scope[]} The token's scope stack.
  */
 module.exports = function(scopelessToken) {
-	//TODO: progress and regress scope stack
 	let lastScope = scopeStack[scopeStack.length -1];
 	let isDelimiter = false;
 	scopeDelimiters.forEach(function(el){
-		if (scopelessToken.symbol === el.stopDelimiter) {
+		if (el.stopDelimiter.test(scopelessToken.symbol)) {
 			if (!lastScope) {
 				error('not starting in global scope', scopelessToken);
 			} else {
 				if (lastScope.type !== el.scope) {
-					error('scope ending before starting', scopelessToken);
+					//TODO: better handle this error caused by colision between block scope
+					//error('scope ending before starting', scopelessToken);
 				} else {
 					scopeStack.pop();
 					isDelimiter = 'stop';
@@ -31,7 +31,7 @@ module.exports = function(scopelessToken) {
 
 		}
 
-		if (scopelessToken.symbol === el.startDelimiter) {
+		if (el.startDelimiter.test(scopelessToken.symbol)) {
 			if (!lastScope && el.scope !== 'global') {
 				error('not starting in global scope', scopelessToken);
 			} else {

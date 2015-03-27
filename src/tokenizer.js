@@ -3,7 +3,7 @@
  * @module src/tokenizer
  */
 
-let error = import('./error');
+let error = require('./error');
 
 /**
  * The token constructor.
@@ -16,8 +16,8 @@ let error = import('./error');
  * @returns {Token} The token generated from the symbol and position.
  */
 let Token = (function(){
-	let typeList = import('../lang/rules').types;
-	let scopify = import('./scopify');
+	let typeList = require('../lang/rules').types;
+	let scopify = require('./scopify');
 
 	function _Token(symbol, rawPosition){
 		/*jshint validthis:true*/
@@ -26,7 +26,7 @@ let Token = (function(){
 
 		token.symbol = symbol;
 		token.position = {
-			line: rawPosition[0] + 1,
+			line: Number.parseInt(rawPosition[0]) + 1,
 			column: rawPosition[1] + 1,
 			length: rawPosition[2] || 1
 		};
@@ -64,13 +64,13 @@ let Token = (function(){
  * @returns {Token[]} The list of tokens generated form the source code.
  */
 function tokenize(source){
-	let wordDelimiters = import('../lang/rules').wordDelimiters;
+	let wordDelimiters = require('../lang/rules').wordDelimiters;
 	let tokenList = [];
 	let sourceLines = source.split('\n');
 
 	for (let line in sourceLines) {
 		let match;
-		while ((match = wordDelimiters.exec(line)) !== null) {
+		while ((match = wordDelimiters.exec(sourceLines[line])) !== null) {
 			tokenList.push(new Token(match[0], [line, match.index, match[0].length]));
 		}
 	}

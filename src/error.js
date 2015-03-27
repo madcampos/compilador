@@ -2,7 +2,7 @@
  * Handler module for errors
  * @module src/error
  */
-let errorList = import('../lang/rules').errors;
+let errorList = require('../lang/rules').errors;
 
 /**
  * Log the error to the console given the error alias.

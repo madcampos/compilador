@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+let program = require('commander');
+let fs = require('fs');
+
+let compiler = require('../index');
+let output = '';
+
+program
+	.version('1.1.1')
+	.usage('[options]')
+	.description('LALG compiler')
+	.option('-t, --tokenize <path>', 'Tokenize the file at the given path.')
+	.option('-o, --output <path>', 'The file to output to.')
+	.parse(process.argv);
+
+if (program.tokenize) {
+	output = compiler.tokenize(program.tokenize);
+}
+
+if (program.output) {
+	fs.writeFileSync(program.output, output);
+} else {
+	console.log(output);
+}

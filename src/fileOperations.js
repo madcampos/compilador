@@ -9,7 +9,8 @@ let path = require('path');
 
 module.exports = function(pathString){
 	pathString = path.normalize(pathString);
-	if (!fs.accessSync(pathString, fs.F_OK) ) {
+	//TODO: solve file reading problems
+	/*if (!fs.accessSync(pathString, fs.F_OK) ) {
 		error('file not found', [0,0]);
 		return;
 	} else {
@@ -25,5 +26,6 @@ module.exports = function(pathString){
 				return file;
 			}
 		}
-	}
+	}*/
+	return fs.readFileSync(pathString, {encoding: 'utf8'});
 };
