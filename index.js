@@ -1,5 +1,5 @@
-let tokenizer = require('./src/tokenizer');
-let fileOperations = require('./src/fileOperations');
+var tokenizer = require('./src/tokenizer');
+var fileOperations = require('./src/fileOperations');
 
 function tokenize(path){
 	return tokenizer(fileOperations(path));
