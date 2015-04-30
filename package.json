@@ -1,32 +1,33 @@
 {
-	"name": "lalger",
-	"version": "1.1.2",
-	"description": "Compiler of the LALG language.",
-	"author": "Marco Aurélio Dilda Campos <madcampos@outlook.com>",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/madcampos/compilador"
-	},
-	"bugs": {
-		"url": "https://github.com/madcampos/compilador/issues"
-	},
-	"license": "MIT",
-	"main": "index.js",
-	"scripts": {
-		"sart": "iojs --harmony --harmony_arrays index.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"bin": {
-		"lalger": "./bin/lalger"
-	},
-	"keywords": [
-		"compiler",
-		"lalg",
-		"academic"
-	],
-	"dependencies": {
-		"commander": "^2.7.1"
-	},
-	"preferGlobal": true,
-	"private": true
+  "name": "lalger",
+  "version": "1.1.2",
+  "description": "Compiler of the LALG language.",
+  "author": "Marco Aurélio Dilda Campos <madcampos@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madcampos/compilador"
+  },
+  "bugs": {
+    "url": "https://github.com/madcampos/compilador/issues"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "sart": "iojs --harmony --harmony_arrays index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "lalger": "./bin/lalger"
+  },
+  "keywords": [
+    "compiler",
+    "lalg",
+    "academic"
+  ],
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "commander": "^2.7.1"
+  },
+  "preferGlobal": true,
+  "private": true
 }

@@ -3,9 +3,9 @@
  * @module src/fileOperations
  */
 
-let error = require('./error');
-let fs = require('fs');
-let path = require('path');
+var error = require('./error');
+var fs = require('fs');
+var path = require('path');
 
 module.exports = function(pathString){
 	pathString = path.normalize(pathString);
@@ -18,7 +18,7 @@ module.exports = function(pathString){
 			error('cant open file', [0,0]);
 			return;
 		} else {
-			let file = fs.readFileSync(pathString, {encoding: 'utf8'});
+			var file = fs.readFileSync(pathString, {encoding: 'utf8'});
 			if (file === '') {
 				error('empty source code', [0,0]);
 				return;

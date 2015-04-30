@@ -3,7 +3,9 @@
  * @module src/tokenizer
  */
 
-let error = require('./error');
+var error = require('./error');
+
+//TODO: rename to seeder & seeds to keep up with the consept of growing a plant
 
 /**
  * The token constructor.
@@ -15,14 +17,13 @@ let error = require('./error');
  * @param {Number} [rawPosition[2]=1] - The token length.
  * @returns {Token} The token generated from the symbol and position.
  */
-let Token = (function(){
-	let typeList = require('../lang/rules').types;
-	let scopify = require('./scopify');
+ //TODO: refactor to not use 'new', instead use another method of generating obects
+var generateToken = (function(){
+	var typeList = require('../lang/rules').types;
+	var scopify = require('./scopify');
 
-	function _Token(symbol, rawPosition){
-		/*jshint validthis:true*/
-		/** @this Token */
-		let token = this;
+	function _generateToken(symbol, rawPosition){
+		var token = {};
 
 		token.symbol = symbol;
 		token.position = {
@@ -55,7 +56,7 @@ let Token = (function(){
 		 */
 		return token;
 	}
-	return _Token;
+	return _generateToken;
 })();
 
 /**
@@ -64,14 +65,14 @@ let Token = (function(){
  * @returns {Token[]} The list of tokens generated form the source code.
  */
 function tokenize(source){
-	let wordDelimiters = require('../lang/rules').wordDelimiters;
-	let tokenList = [];
-	let sourceLines = source.split('\n');
+	var wordDelimiters = require('../lang/rules').wordDelimiters;
+	var tokenList = [];
+	var sourceLines = source.split('\n');
 
-	for (let line in sourceLines) {
-		let match;
+	for (var line in sourceLines) {
+		var match;
 		while ((match = wordDelimiters.exec(sourceLines[line])) !== null) {
-			tokenList.push(new Token(match[0], [line, match.index, match[0].length]));
+			tokenList.push(generateToken(match[0], [line, match.index, match[0].length]));
 		}
 	}
 

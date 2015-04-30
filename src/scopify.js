@@ -1,11 +1,13 @@
+//TODO: rename to photoshyntesis or something to keep up with the concept of growing a tree
+
 /**
  * Scopify a Token.
  * @module src/scopify
  */
-let error = require('./error');
+var error = require('./error');
 
-let scopeStack = [];
-let scopeDelimiters = require('../lang/rules').scopeDelimiters;
+var scopeStack = [];
+var scopeDelimiters = require('../lang/rules').scopeDelimiters;
 
 /**
  * Find the current scope of the given token and the token stack to follow.
@@ -13,8 +15,8 @@ let scopeDelimiters = require('../lang/rules').scopeDelimiters;
  * @returns {Scope[]} The token's scope stack.
  */
 module.exports = function(scopelessToken) {
-	let lastScope = scopeStack[scopeStack.length -1];
-	let isDelimiter = false;
+	var lastScope = scopeStack[scopeStack.length -1];
+	var isDelimiter = 'false';
 	scopeDelimiters.forEach(function(el){
 		if (el.stopDelimiter.test(scopelessToken.symbol)) {
 			if (!lastScope) {

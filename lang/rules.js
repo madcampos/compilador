@@ -21,6 +21,8 @@
  * @property {String} errors[].scope - The error scope.
  */
 
+//TODO: add whitespace and unknown symbols to classes and validation
+//TODO: add BNF like representation of the rules for inerpolation and/or use, maybe functions?
 module.exports = {
 	'types': [
 		{
