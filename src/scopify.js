@@ -1,60 +1,46 @@
-//TODO: rename to photoshyntesis or something to keep up with the concept of growing a tree
-
 /**
  * Scopify a Token.
  * @module src/scopify
  */
-var error = require('./error');
+let error = require('./error');
 
-var scopeStack = [];
-var scopeDelimiters = require('../lang/rules').scopeDelimiters;
+let curentScope = 0;
+let scopeList = [];
+let scopeDelimiters = require('../lang/rules').scopeDelimiters;
 
 /**
  * Find the current scope of the given token and the token stack to follow.
  * @param {Token} scopelessToken - A token without scope to be found the scope.
- * @returns {Scope[]} The token's scope stack.
+ * @returns {Object} The token's scope information.
  */
 module.exports = function(scopelessToken) {
-	var lastScope = scopeStack[scopeStack.length -1];
-	var isDelimiter = 'false';
-	scopeDelimiters.forEach(function(el){
-		if (el.stopDelimiter.test(scopelessToken.symbol)) {
-			if (!lastScope) {
-				error('not starting in global scope', scopelessToken);
-			} else {
-				if (lastScope.type !== el.scope) {
-					//TODO: better handle this error caused by colision between block scope
-					//error('scope ending before starting', scopelessToken);
-				} else {
-					scopeStack.pop();
-					isDelimiter = 'stop';
-				}
-			}
-
-		}
-
-		if (el.startDelimiter.test(scopelessToken.symbol)) {
-			if (!lastScope && el.scope !== 'global') {
-				error('not starting in global scope', scopelessToken);
-			} else {
-				/**
-				 * Scope model definition.
-				 * @typedef {Object} Scope
-				 * @property {String} type - The scope type.
-				 * @property {Token} startDelimiter - The token that starts the scope.
-				 */
-				scopeStack.push({
-					type: el.scope,
-					startDelimiter: scopelessToken
-				});
-				isDelimiter = 'start';
-			}
-		}
-	});
+	/**
+	 * Scope model definition.
+	 * @typedef {Object} scope
+	 * @property {String} type - The scope type.
+	 * @property {Number} precedence - The scope type.
+	 * @property {String} name - The scope type.
+	 * @property {Number[]} stack - The scope type.
+	 * @property {Object[]} lets - The scope type.
+	 * @property {Object[]} consts - The scope type.
+	 * @property {Token} startDelimiter - The token that starts the scope.
+	 * @property {Token} stopDelimiter - The token that starts the scope.
+	 */
+	let scope = {};
+	let isDelimiter = false;
 
 	return {
-		scopeStack: scopeStack,
-		tokenScope: lastScope,
-		isDelimiter: isDelimiter
-	};
+		isDelimiter: isDelimiter,
+		scope: curentScope
+	}
+
+};
+
+/**
+ * Find a scope by it's identifier
+ * @param {Number} id - The scope's identifier.
+ * @returns {scope} The scope refered by the identifier.
+ */
+exports.findScope = function(id){
+	return scopeList[id];
 };

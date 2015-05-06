@@ -3,9 +3,7 @@
  * @module src/tokenizer
  */
 
-var error = require('./error');
-
-//TODO: rename to seeder & seeds to keep up with the consept of growing a plant
+let error = require('./error');
 
 /**
  * The token constructor.
@@ -17,13 +15,11 @@ var error = require('./error');
  * @param {Number} [rawPosition[2]=1] - The token length.
  * @returns {Token} The token generated from the symbol and position.
  */
- //TODO: refactor to not use 'new', instead use another method of generating obects
-var generateToken = (function(){
-	var typeList = require('../lang/rules').types;
-	var scopify = require('./scopify');
+let generateToken = (function(){
+	let typeList = require('../lang/rules').types;
 
 	function _generateToken(symbol, rawPosition){
-		var token = {};
+		let token = {};
 
 		token.symbol = symbol;
 		token.position = {
@@ -32,18 +28,24 @@ var generateToken = (function(){
 			length: rawPosition[2] || 1
 		};
 
+
+		console.log('\n' + token.symbol + '\n');
+
+		//TODO: add precedence to token
 		typeList.forEach(function(type){
+			console.log(type.name + ': ' + type.rule.test(symbol));
 			if (type.rule.test(symbol)) {
 				token.type = type.name;
 				token.class = type.class;
+
 			}
 		});
 
-		//TODO: find token scope
-		token.scope = scopify(token);
+		//TODO: generate unknown token error
+
 
 		/**
-		 * the token of the language.
+		 * The token of the language.
 		 * @typedef {Object} Token
 		 * @property {String} symbol - The token symbol.
 		 * @property {String} type - The token type name.
@@ -52,7 +54,7 @@ var generateToken = (function(){
 		 * @property {Number} position[0] - The token line.
 		 * @property {Number} position[1] - The token column.
 		 * @property {Number} position[2] - The token length.
-		 * @proprety {Scope} scope - The token scope.
+		 * @proprety {scope} scope - The token scope.
 		 */
 		return token;
 	}
@@ -65,12 +67,12 @@ var generateToken = (function(){
  * @returns {Token[]} The list of tokens generated form the source code.
  */
 function tokenize(source){
-	var wordDelimiters = require('../lang/rules').wordDelimiters;
-	var tokenList = [];
-	var sourceLines = source.split('\n');
+	let wordDelimiters = require('../lang/rules').wordDelimiters;
+	let tokenList = [];
+	let sourceLines = source.split('\n');
 
-	for (var line in sourceLines) {
-		var match;
+	for (let line in sourceLines) {
+		let match;
 		while ((match = wordDelimiters.exec(sourceLines[line])) !== null) {
 			tokenList.push(generateToken(match[0], [line, match.index, match[0].length]));
 		}

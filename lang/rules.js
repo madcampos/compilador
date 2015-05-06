@@ -21,61 +21,91 @@
  * @property {String} errors[].scope - The error scope.
  */
 
-//TODO: add whitespace and unknown symbols to classes and validation
 //TODO: add BNF like representation of the rules for inerpolation and/or use, maybe functions?
 module.exports = {
 	'types': [
 		{
 			'name': 'integer',
 			'class': 'C3',
-			'rule': /\d+/
+			'rule': /^\d+$/,
+			'precedence': 1
 		},
 		{
 			'name': 'float',
 			'class': 'C6',
-			'rule': /\d*\.\d+/
+			'rule': /^\d*\.\d+$/,
+			'precedence': 1
 		},
 		{
 			'name': 'identifier',
 			'class': 'C1',
-			'rule': /[a-z]+\w*/
+			'rule': /^[a-z]+\w*$/,
+			'precedence': 3
 		},
 		{
 			'name': 'reservedWord',
 			'class': 'C2',
-			'rule': /program|begin|end|var|real|integer|procedure|read|write|while|do|if|else|then/
+			'rule': /^program|begin|end|var|real|integer|procedure|read|write|while|do|if|else|then$/,
+			'precedence': 2
 		},
 		{
 			'name': 'specialCharacter',
 			'class': 'C4',
-			'rule': /<>|:=|<=|>=|\(|\)|\*|\/|-|\+|=|>|<|\$|\:|;|\,|\./
+			'rule': /^<>|:=|<=|>=|\(|\)|\*|\/|-|\+|=|>|<|\$|\:|;|\,|\.$/,
+			'precedence': 3
 		},
 		{
 			'name': 'comments',
 			'class': 'C5',
-			'rule': /\{*\}|\/\**\*\//
+			'rule': /^\{.*?\}|\/\*.*?\*\/$/,
+			'precedence': 4
+		},
+		{
+			'name': 'whitespace',
+			'class': 'C6',
+			'rule': /^\s+$/,
+			'precedence': 5
+		},
+		{
+			'name': 'unknown',
+			'class': 'C7',
+			'rule': /.+?/,
+			'precedence': 6
 		}
 	],
 	'scopeDelimiters': [
 		{
 			'startDelimiter': /program/,
 			'stopDelimiter': /\./,
-			'scope': 'global'
+			'scope': 'global',
+			'precedence': 1
+		},
+		{
+			'startDelimiter': /procedure[.\n]*begin/,
+			'stopDelimiter': /end/,
+			'scope': 'procedure',
+			'precedence': 2
 		},
 		{
 			'startDelimiter': /begin/,
 			'stopDelimiter': /end/,
-			'scope': 'block'
-		},
-		{
-			'startDelimiter': /procedure/,
-			//TODO: change procedure end delimiter?
-			'stopDelimiter': /end/,
-			'scope': 'procedure'
+			'scope': 'block',
+			'precedence': 3
 		}
 	],
+	'syntaxRules': function(api){
+		return [
+			{
+				'name': '',
+				'rule': /.*?/,
+				'fn': function(){
+
+				}
+			}
+		];
+	},
 	//Organized list of all the above tests so that the tokenizer has less work to do in classifying the tokens, but may be slower than char-by-chat testing
-	'wordDelimiters': /\{.*?\}|\/\*.*?\*\/|program|begin|end|var|real|integer|procedure|read|write|while|do|if|else|then|\d*\.\d+|\d+|<>|:=|<=|>=|\(|\)|\*|\/|-|\+|=|>|<|\$|\:|;|\,|\.|[a-z]+\w*/ig,
+	'wordDelimiters': /\{.*?\}|\/\*.*?\*\/|program|begin|end|var|real|integer|procedure|read|write|while|do|if|else|then|\d*\.\d+|\d+|<>|:=|<=|>=|\(|\)|\*|\/|-|\+|=|>|<|\$|\:|;|,|\.|[a-z]+\w*|\s+|.+?/ig,
 	//TODO: implement errors
 	'errors': [
 		//File errors
@@ -104,15 +134,21 @@ module.exports = {
 			'message': 'Source conde don\'t contain any token.',
 			'scope': 'Lexical'
 		},
-		//Scopifyer errors
 		{
 			'code': '005',
+			'alias': 'unknown token',
+			'message': 'This token is unknown.',
+			'scope': 'Lexical'
+		},
+		//Scopifyer errors
+		{
+			'code': '006',
 			'alias': 'not starting in global scope',
 			'message': 'Not starting in global scope.',
 			'scope': 'Syntax'
 		},
 		{
-			'code': '006',
+			'code': '007',
 			'alias': 'scope ending before starting',
 			'message': 'Scope ending before starting.',
 			'scope': 'Syntax'

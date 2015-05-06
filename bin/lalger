@@ -1,5 +1,7 @@
 #!/usr/bin/env iojs --harmony --harmony_arrays --use_strict
 
+//FIXME: move cli logic to src
+
 let program = require('commander');
 let Table = require('cli-table');
 let fs = require('fs');
@@ -14,6 +16,7 @@ program
 	.option('-t, --tokenize <path>', 'Tokenize the file at the given path.')
 	.option('-o, --output <path>', 'The file to output to.')
 	.option('-e, --exercise', 'The syntax required for the exercises of the course.')
+	.option('-s, --silent', 'Don\' output to the console.')
 	.parse(process.argv);
 
 if (program.tokenize) {
@@ -44,5 +47,7 @@ if (program.tokenize) {
 if (program.output) {
 	fs.writeFileSync(program.output, output);
 } else {
-	console.log(output);
+	if (!program.silent) {
+		console.log(output);
+	}
 }

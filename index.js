@@ -1,5 +1,6 @@
-var tokenizer = require('./src/tokenizer');
-var fileOperations = require('./src/fileOperations');
+//FIXME: rework this to proper function as a library
+let tokenizer = require('./src/tokenizer');
+let fileOperations = require('./src/fileOperations');
 
 function tokenize(path){
 	return tokenizer(fileOperations(path));
