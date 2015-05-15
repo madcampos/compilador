@@ -1,0 +1,34 @@
+programa = 'program' , ident , corpo , '.';
+corpo = declaração , 'begin' , comandos , 'end';
+declaração = [declaraçãoVar | declaraçãoProc , [';' , declaração]];
+
+declaraçãoVar = 'var' , identComTipo , [';' , declaraçãoVar];
+listaIdent = ident , [',' , listaIdent];
+identComTipo = listaIdent , ':' , tipoVar;
+tipoVar = 'integer' | 'real';
+
+declaraçãoProc = 'procedure' , ident , parâmetros , corpoLocal;
+parâmetros = '(' , listaPar ,')';
+listaPar = identComTipo , [';' , listaPar];
+(* igual corpo, só que com passagem de um parâmetro para diferenciar os esopos local e global *)
+corpoLocal = declaraçãoVar , 'begin' , comandos , 'end';
+
+listaArg = '(' , listaIdent , ')';
+
+comandos = 'read' , listaArg
+	| 'write' , listaArg
+	| 'while' , condição , 'do' , comandos , '$'
+	| 'if' , condição , 'then' , comandos , ['else' , comandos] , '$'
+	| ident , (':=' , expressão) | listaArg
+	, [';' , comandos];
+
+condição = expressão , relação , expressão;
+relação = '=' | '<>' | '>=' | '<=' | '>' | '<';
+expressão = expressãoPrecedente , ['+' | '-' , expressãoPrecedente];
+expressãoPrecedente = termo , ['*' | '/' , termo];
+termo = ['+' | '-'] , (ident | real | inteiro | ('(' , expressão , ')'))
+
+(* definição dos primitivos *)
+ident = ? palavra de identificador ?
+real = ? ponto flutuante ?
+integer = ? inteiro ?

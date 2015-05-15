@@ -15,6 +15,7 @@ module.exports = function(pathString){
 		return;
 	} else {
 		//TODO: solve file reading problems
+		//TODO: fs.acess trows an error or does nothing, so needs to use the async version to catch error
 		if (false) {
 			error('cant open file', [0,0]);
 			return;
