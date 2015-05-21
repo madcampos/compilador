@@ -54,7 +54,7 @@ module.exports = {
 		//Erros de arquivo
 		{
 			'code': 1,
-			'alias': 'arquivo não encontraro',
+			'alias': 'arquivo não encontrado',
 			'message': 'Arquivo não encontrado.',
 			'scope': 'Arquivo'
 		},

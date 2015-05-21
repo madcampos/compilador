@@ -1,0 +1,20 @@
+[
+  "let tokenizer = require('./src/tokenizer')",
+  "tokenizer.tokenList.currentPosition",
+  "let tokenizer = require('./src/tokenizer')",
+  "tokenizer.tokenList.currentPosition",
+  "tokenizer",
+  "tokenizer.tokenList",
+  "let tokenizer = require('./src/tokenizer')",
+  "tokenizer",
+  "tokenizer.tokenList",
+  "tokenizer",
+  "let tokenizer = require('./src/tokenizer')",
+  "tokenizer",
+  "let tokenizer = require('./src/tokenizer')",
+  "console.log(tokenizer);",
+  "tokenizer",
+  "tokenizer.tokenize('test')",
+  "tokenizer",
+  "let tokenizer = require('./src/tokenizer')"
+]

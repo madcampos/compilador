@@ -1,88 +1,152 @@
-/**
- * This module is responsible for the tokenization of the source code.
- * @module src/tokenizer
- */
-
 let error = require('./error');
+let tokenList = [];
+let rawList = [];
+let currentPosition = {
+	column: 1,
+	line: 1
+};
+let types = require('../lang/rules').types;
+let currentScope = 0;
+let scopeList  = [];
+let scopeStack = [0];
 
-/**
- * The token constructor.
- * @constructor
- * @param {String} symbol - The symbol string.
- * @param {Number[]} rawPosition - The token raw position (a.k.a.: 0 starting position).
- * @param {Number} rawPosition[0] - The token line.
- * @param {Number} rawPosition[1] - The token column.
- * @param {Number} [rawPosition[2]=1] - The token length.
- * @returns {Token} The token generated from the symbol and position.
- */
-let generateToken = (function(){
-	let typeList = require('../lang/rules').types;
+let initialized = false;
 
-	function _generateToken(symbol, rawPosition){
-		let token = {};
+Object.defineProperty(Array.prototype, 'lastElement', {
+	get: function(){
+		return this[this.lastIndex];
+	},
+	set: function(el){
+		this[this.lastIndex] = el;
+	},
+	enumerable: false
+});
 
-		token.symbol = symbol;
-		token.position = {
-			line: Number.parseInt(rawPosition[0]) + 1,
-			column: rawPosition[1] + 1,
-			length: rawPosition[2] || 1
-		};
+Object.defineProperty(Array.prototype, 'lastIndex', {
+	get: function(){
+		return this.length -1;
+	},
+	enumerable: false
+});
 
+let token = {
+	get symbol(){return tokenList.lastElement ? tokenList.lastElement.symbol : undefined;},
+	get cls(){return tokenList.lastElement ? tokenList.lastElement.cls : undefined;},
+	get type(){return tokenList.lastElement ? tokenList.lastElement.type : undefined;},
+	get rule(){return tokenList.lastElement ? tokenList.lastElement.rule : undefined;},
+	get position(){return currentPosition;}
+};
 
-		console.log('\n' + token.symbol + '\n');
+Object.defineProperties(token, {
+	tokenList: {
+		get: function(){return tokenList;},
+		enumerable: false
+	},
+	symbolTable: {
+		get: function(){},
+		enumerable: false
+	},
+	next: {
+		value: function(){
+			let type;
 
-		//TODO: add precedence to token
-		typeList.forEach(function(type){
-			console.log(type.name + ': ' + type.rule.test(symbol));
-			if (type.rule.test(symbol)) {
-				token.type = type.name;
-				token.class = type.class;
-
+			if (rawList.length === 0) {
+				return;
 			}
-		});
 
-		//TODO: generate unknown token error
+			type = types.find(function(el){
+				return el.rule.test(rawList[tokenList.length]);
+			});
 
+			tokenList.push({
+				symbol: rawList[tokenList.length],
+				cls: type.class,
+				rule: type.rule,
+				type: type.name
+			});
 
-		/**
-		 * The token of the language.
-		 * @typedef {Object} Token
-		 * @property {String} symbol - The token symbol.
-		 * @property {String} type - The token type name.
-		 * @property {String} class - The token type class.
-		 * @property {Array} position - The token position.
-		 * @property {Number} position[0] - The token line.
-		 * @property {Number} position[1] - The token column.
-		 * @property {Number} position[2] - The token length.
-		 * @proprety {scope} scope - The token scope.
-		 */
-		return token;
+			if (tokenList.lastElement.symbol === '\n') {
+				currentPosition.line++;
+			}
+			currentPosition.column += tokenList.lastElement.symbol.length;
+		},
+		enumerable: false
+	},
+	setAttribute: {
+		value: function(attribute, value, index){
+			index = index || tokenList.lastIndex;
+			tokenList[index][attribute] = value;
+		},
+		enumerable: false
+	},
+	getAttribute: {
+		value: function(attribute, index){
+			index = index || tokenList.lastIndex;
+			if (tokenList[index].hasOwnProperty(attribute)) {
+				return tokenList[index][attribute];
+			}
+		},
+		enumerable: false
+	},
+	initialize: {
+		value: function(source){
+			if (initialized) {
+				return;
+			} else {
+				initialized = true;
+			}
+
+			if (!source) {
+				error('código vazio', null, null, null, true);
+			}
+
+			let delimiters = require('../lang/rules').wordDelimiters;
+			rawList = source.match(delimiters);
+
+			if (!rawList) {
+				error('código sem tokens', null, null, null, true);
+			}
+
+			this.next();
+		},
+		enumerable: false
+	},
+	socpe: {
+		value: {
+			increment: function(startDelimiter, identifier){
+				currentScope++;
+				scopeStack.push(currentScope);
+
+				scopeList.push({
+					identifier: identifier,
+					startDelimiter: startDelimiter,
+					stack: scopeStack.slice()
+				});
+			},
+			decrement: function(endDelimiter){
+				currentScope--;
+				scopeStack.pop();
+
+				scopeList.lastElement.endDelimiter = endDelimiter;
+			}
+		},
+		enumerable: false
 	}
-	return _generateToken;
-})();
+});
 
-/**
- * Tokenize the source code and fill the Symbol Table.
- * @param {String} source - The source code to be tokenized.
- * @returns {Token[]} The list of tokens generated form the source code.
- */
-function tokenize(source){
-	let wordDelimiters = require('../lang/rules').wordDelimiters;
-	let tokenList = [];
-	let sourceLines = source.split('\n');
-
-	for (let line in sourceLines) {
-		let match;
-		while ((match = wordDelimiters.exec(sourceLines[line])) !== null) {
-			tokenList.push(generateToken(match[0], [line, match.index, match[0].length]));
-		}
+Object.defineProperties(token.tokenList, {
+	tokenInPosition: {
+		value: function(pos){
+			return tokenList[pos];
+		},
+		enumerable: false
+	},
+	currentPosition:{
+		get: function(){
+			return tokenList.lastIndex;
+		},
+		enumerable: false
 	}
+});
 
-	if (tokenList.length === 0) {
-		error('source dont contain tokens', [0,0]);
-	}
-
-	return tokenList;
-}
-
-module.exports = tokenize;
+module.exports = token;

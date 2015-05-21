@@ -1,34 +1,42 @@
-//FIXME: use proper error handling
-//FIXME: rewrite to better show errors
-//FIXME: use a library
+let errorDefinitions = require('../lang/rules').errors;
+function CompilerError(msg, code, type, token, stack, next, abort){
+	this.token = token || {symbol: '', position: {line: 0, column: 0}};
+	this.name  = type;
+	this.code = code;
+	this.msg = `Erro de ${type} - [${token.position.line},${token.position.column}]: ${msg}
+Token afetado: "${token.symbol}".`;
 
-/**
- * Handler module for errors
- * @module src/error
- */
-let errorList = require('../lang/rules').errors;
-
-/**
- * Log the error to the console given the error alias.
- * @param {String} alias - The error alias.
- * @param {[Number, Number] | Token} token - The token where the error occured.
- */
-//should write errors using template strings or other source, message should be dependent on an "data" object (message dependant) witch contains the itens used to the template string
-module.exports = function(alias, token){
-	//TODO: change token message to "default message" and construct its parts with the data object
-	let tokenMsg = '';
-
-	if (Array.isArray(token)) {
-		tokenMsg = 'Line: ' + token[0] + ', Column: ' + token[1] + '.';
-	} else {
-		tokenMsg = 'Line: ' + token.position[0] + ', Column: ' + token.position[1] + ' @ Symbol: "' + token.symbol + '" (' + token.class + ': ' + token.type + ').';
+	if (stack) {
+		this.msg += '\n' + stack;
 	}
 
-	let err = errorList.find(function(el){
-		return el.alias === alias;
+	if (next) {
+		next();
+	}
+
+	if (abort) {
+		process.exit();
+	}
+}
+CompilerError.prototype = Object.create(Error.prototype);
+CompilerError.prototype.constructor = CompilerError;
+
+function error(msg, token, stack, next, abort){
+	let err = errorDefinitions.find(function(el){
+		return el.alias === msg;
 	});
 
-	//TODO: implement stack trace
-	console.error(err.scope + ' error ' + err.code + ': ' + err.message + '\n' + tokenMsg);
-};
+	if (!err) {
+		err = {
+			message: msg,
+			alias: msg,
+			scope: 'GERADO',
+			code: errorDefinitions[errorDefinitions.length - 1].code + 1
+		};
+		errorDefinitions.push(err);
+	}
 
+	throw new CompilerError(err.message, err.code, err.scope, token, stack, next, abort);
+}
+
+module.exports = error;

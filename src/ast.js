@@ -1,332 +1,304 @@
-/*global tokenList*/
-/**
- * This module is responsible for generating the Abstract Syntax Tree
- * @module src/ast
- */
+let token = require('./tokenizer');
+let error = require('./error')(token);
 
-/* module.exports = function(tokenList){
-	let tree = {};
-	let curentToken = {};
+module.exports = programa;
 
-	let api = {
-		grabToken: function(){
-			curentToken++;
-			return tokenList[curentToken-1];
-		},
-		matchRule: function(token){
+function programa(){
+	if (token.symbol === 'program') {
+		token.next();
+		if (token.type === 'identifier'){
+			identificador();
+			token.next();
+			corpo();
 
-		},
-		checkType: function(typeIdentifier, literalValue){
-
-		},
-		coerse: function(firstLiteral, secondLiteral){
-
-		},
-		node: {
-			siblings: function(){
-				return curentToken.parent.children;
-			},
-			parent: function(){
-				return curentToken.parent;
-			},
-			children: function(){
-				return curentToken.children;
-			},
-			previousSibling: function(){
-
-			},
-			nextSibling: function(){
-
-			},
-			hasChildren: function(){
-				return curentToken.children.length !== 0 ? false : true;
-			},
-			appendChild: function(){
-
-			},
-			insertBefore: function(){
-
-			},
-			insertAfter: function(){
-
-			},
-			remove: function(){
-
-			}
-		},
-		error: import('./error')
-	};
-
-	let syntaxRules = import('../lang/rules').syntaxRules(api);
-};*/
-
-module.exports = ruleProgram;
-let error = require('./error');
-let currentToken = 0;
-
-function ruleProgram(tokenList){
-	if (tokenList[currentToken].symbol === 'program') {
-		currentToken++;
-		if (tokenList[currentToken].type === 'identifier') {
-			currentToken++;
-			ruleBody();
-
-			if (tokenList[currentToken].symbol !== '.') {
-				error('expected .', tokenList[currentToken]);
+			token.next();
+			if(token.symbol !== '.') {
+				error('programa deve terminar com um .');
 			}
 		} else {
-			error('expected identifier', tokenList[currentToken]);
+			error('program precisa ser seguida de um identificador');
 		}
 	} else {
-		error('expected program', tokenList[currentToken]);
+		error('programa precisa começar com program');
 	}
 }
 
-function ruleBody(){
-	ruleDc();
-	if (tokenList[currentToken].symbol === 'begin') {
-		currentToken++;
-		ruleCommand();
+function corpo(local){
+	declaração(local);
 
-		if (tokenList[0].symbol === 'end') {
-			currentToken++;
-		} else {
-			error('expected end', tokenList[currentToken]);
+	token.next();
+	if (token.symbol === 'begin') {
+		token.next();
+		comandos();
+
+		token.next();
+		if (token.symbol !== 'end') {
+			error('bloco de comandos deve terminar com end');
 		}
 	} else {
-		error('expected begin', tokenList[currentToken]);
+		error('bloco de comandos deve começar com begin');
 	}
 }
 
-function ruleDc(){
-	if (tokenList[currentToken].symbol === 'var') {
-		currentToken++;
-		ruleVarDc();
-	} else if (tokenList[currentToken].symbol === 'procedure') {
-		currentToken++;
-		ruleProcedureDc();
-	}
-
-	if (tokenList[currentToken].symbol === ';') {
-		currentToken++;
-		ruleDc();
-	} else {
-		error('expected ;', tokenList[currentToken]);
-	}
-}
-
-function ruleVarDc(){
-	if (tokenList[currentToken].type === 'identifier') {
-		currentToken++;
-		if (tokenList[currentToken].symbol === ',') {
-			currentToken++;
-			ruleVarDc();
-		} else if (tokenList[currentToken].symbol === ':') {
-			currentToken++;
-			ruleVarType();
-		} else {
-			error('expected , or :', tokenList[currentToken]);
-		}
-	} else {
-		error('expected identifier', tokenList[currentToken]);
-	}
-}
-
-function ruleVarType(){
-	if (tokenList[currentToken].symbol === 'real') {
-		//TODO: type bind
-	} else if (tokenList[currentToken].symbol === 'integer') {
-		//TODO: type bind
-	} else {
-		error('expected type declaration', tokenList[currentToken]);
-	}
-
-	currentToken++;
-}
-
-function ruleProcedureDc(){
-	if (tokenList[currentToken].type === 'identifier') {
-		//TODO: increment scope
-		currentToken++;
-		ruleParam();
-		ruleProcedureBody();
-	} else {
-		error('expected identifier', tokenList[currentToken]);
-	}
-}
-
-function ruleProcedureBody(){
-	if (tokenList[currentToken].symbol === 'var') {
-		//TODO: associate vars with scope
-		currentToken++;
-		ruleVarDc();
-
-		if (tokenList[currentToken].symbol === ';') {
-			currentToken++;
-			ruleProcedureBody();
-		}
-	}
-
-	if (tokenList[currentToken].symbol === 'begin') {
-		ruleBody();
-	} else {
-		error('expected procedure body', tokenList[currentToken]);
-	}
-}
-
-function ruleParam(){
-	//TODO: associate params with scope
-	if (tokenList[currentToken].symbol === '(') {
-		currentToken++;
-		if (tokenList[currentToken].type === 'identifier') {
-			ruleParamList();
-		}
-
-		if (tokenList[currentToken].symbol === ')') {
-			currentToken++;
-		} else {
-			error('expected )', tokenList[currentToken]);
-		}
-	} else {
-		error('expected (', tokenList[currentToken]);
-	}
-}
-
-function ruleParamList(){
-	ruleVarDc();
-	if (tokenList[currentToken].symbol === ';') {
-		 currentToken++;
-		ruleParamList();
-	}
-}
-
-function ruleCommand(){
-
-	switch(tokenList[currentToken].symbol){
-		case 'read':
-			currentToken++;
-			ruleRead();
+function declaração(local){
+	switch (token.symbol) {
+		case 'var':
+			declaraçãoVar();
 			break;
-		case 'write':
-			currentToken++;
-			ruleWrite();
-			break;
-		case 'while':
-			currentToken++;
-			ruleWhile();
-			break;
-		case 'if':
-			currentToken++;
-			ruleIf();
+		case 'procedure':
+			if (!local) {
+				declaraçãoProc();
+			} else {
+				error('procedimentos não podem ser declarados localmente');
+			}
 			break;
 		case ';':
-			currentToken++;
-			ruleCommand();
+			token.next();
+			declaração();
 			break;
 	}
+}
 
-	if (tokenList[currentToken].type === 'identifier') {
-		ruleIdentCall();
+function declaraçãoVar(){
+	//TODO: checagem de variáveis e tipos
+	if (token.symbol === 'var') {
+		token.next();
+		identificadoresComTipo();
+	}
+
+	if (token.symbol === ';') {
+		token.next();
+		declaração();
 	}
 }
 
-function ruleRead(){
-	ruleParam();
+function listaIdent(){
+	if (token.type === 'identifier') {
+		identificador();
+		token.next();
+	} else if (token.symbol === ',') {
+		token.next();
+		listaIdent();
+	} else {
+		error('esperado uma lista de identificadores');
+	}
 }
 
-function ruleWrite(){
-	ruleParam();
+function identificadoresComTipo(){
+	listaIdent();
+	if (token.symbol === ':') {
+		token.next();
+		tipoVar();
+	} else {
+		error('esperado o coaracter :');
+	}
 }
-function ruleWhile(){
-	ruleCondition();
-	if (tokenList[currentToken].symbol === 'do') {
-		currentToken++;
-		ruleCommand();
 
-		if (tokenList[currentToken].symbol === '$') {
-			currentToken++;
+function tipoVar(){
+	switch (token.type) {
+		case 'integer':
+			primitivoInteiro();
+			break;
+		case 'real':
+			primitivoReal();
+			break;
+		default:
+			error('esperado uma definição de tipo');
+			break;
+	}
+}
+
+function declaraçãoProc(){
+	if (token.symbol === 'procedure') {
+		token.next();
+		if (token.type === 'identifier') {
+			identificador();
+			token.next();
+			parâmetros();
+			corpo(true);
 		} else {
-			error('expected $', tokenList[currentToken]);
+			error('procedure deve ser acompanhado de identificador');
+		}
+	}
+}
+
+function parâmetros(){
+	if (token.symbol === '(') {
+		token.next();
+		listaPar();
+		if (token.symbol === ')') {
+			token.next();
+		} else {
+			error('parâmetros devem terminar com )');
 		}
 	} else {
-		error('expected do', tokenList[currentToken]);
+		error('parâmetros devem começar com (');
 	}
 }
-function ruleIf(){
-	ruleCondition();
-	if (tokenList[currentToken].symbol === 'then') {
-		currentToken++;
-		ruleCommand();
-		ruleElse();
 
-		if (tokenList[currentToken].symbol === '$') {
-			currentToken++;
+function listaPar(){
+	if (token.symbol === ';') {
+		token.next();
+		listaPar();
+	} else {
+		identificadoresComTipo();
+	}
+}
+
+function listaArg(){
+	if (token.symbol === '(') {
+		token.next();
+		listaIdent();
+		if (token.symbol === ')') {
+			token.next();
 		} else {
-			error('expected $', tokenList[currentToken]);
+			error('argumentos devem terminar com )');
 		}
 	} else {
-		error('expected then', tokenList[currentToken]);
-	}
-}
-function ruleElse(){
-	if (tokenList[currentToken].symbol === 'else') {
-		currentToken++;
-		ruleCommand();
+		error('argumentos devem começar com (');
 	}
 }
 
-function ruleCondition(){
-	ruleExpression();
-	ruleRelation();
-	ruleExpression();
+function comandos(){
+	switch (token.symbol) {
+		case 'read':
+			token.next();
+			listaArg();
+			break;
+		case 'write':
+			token.next();
+			listaArg();
+			break;
+		case 'if':
+			token.next();
+			condição();
+			if (token.symbol === 'then') {
+				token.next();
+				comandos();
+
+				if (token.symbol === 'else') {
+					token.next();
+					comandos();
+				}
+
+				if (token.symbol === '$'){
+					token.next();
+				} else {
+					error('esperado $ depois do if');
+				}
+			} else {
+				error('esperado then depois do if');
+			}
+			break;
+		case 'while':
+			token.next();
+			condição();
+
+			if (token.symbol === 'do') {
+				token.next();
+				comandos();
+
+				if (token.symbol === '$'){
+					token.next();
+				} else {
+					error('esperado $ depois do while');
+				}
+			} else {
+				error('esperado do depois do while');
+			}
+			break;
+		case ';':
+			token.next();
+			comandos();
+			break;
+		default:
+			if (token.type === 'identifier') {
+				//TODO: attribution or call
+				token.next();
+				if (token.symbol === ':=') {
+					token.next();
+					expressão();
+				} else {
+					listaArg();
+				}
+			}
+	}
 }
 
-function ruleExpression(){
-
+function condição(){
+	expressão();
+	relação();
+	expressão();
 }
 
-function ruleRelation(){
-	switch (tokenList[currentToken].symbol) {
+function relação(){
+	switch (token.symbol) {
+			//TODO: implementar
 		case '=':
 		case '<>':
 		case '>=':
 		case '<=':
 		case '>':
 		case '<':
-			currentToken++;
+			token.next();
+			break;
 	}
 }
 
-function ruleIdentCall(){
-	if (tokenList[currentToken].symbol === ':=') {
-		currentToken++;
-		ruleExpression();
-	} else {
-		ruleArgList();
+function expressão(){
+	expressãoPrecedente();
+	if (token.symbol === ('+' || '-')) {
+		token.next();
+		expressãoPrecedente();
 	}
 }
 
-function ruleArgList(){
-	if (tokenList[currentToken].symbol === '(') {
-		currentToken++;
-		ruleArg();
-
-		if (tokenList[currentToken].symbol === ')') {
-			currentToken++;
-		} else {
-			error('expected )', tokenList[currentToken]);
-		}
+function expressãoPrecedente(){
+	termo();
+	if (token.symbol === ('*' || '/')) {
+		token.next();
+		termo();
 	}
 }
 
-function ruleArg(){
-	if (tokenList[currentToken].type === 'identifier'){
-		currentToken++;
-		if (tokenList[currentToken].symbol === ';') {
-			currentToken++;
-			ruleArg();
-		}
-	} else {
-		error('expected identifier', tokenList[currentToken]);
+function termo(){
+	if (token.symbol === ('+' || '-')) {
+		token.next();
 	}
+
+	switch (token.type) {
+		case 'identifier':
+			identificador();
+			break;
+		case 'real':
+			primitivoReal();
+			break;
+		case 'integer':
+			primitivoInteiro();
+			break;
+		default:
+			if (token.symbol === '(') {
+				token.next();
+				expressão();
+				if (token.symbol === ')') {
+					token.next();
+				} else {
+					error('expressão devem terminar com )');
+				}
+			} else {
+				error('expressão devem começar com (');
+			}
+	}
+}
+
+function identificador(){
+	//TODO: implementar
+}
+
+function primitivoInteiro(){
+	//TODO: implementar
+}
+
+function primitivoReal(){
+	//TODO: implementar
 }
